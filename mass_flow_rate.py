@@ -24,7 +24,7 @@ OUTPUT_CSV = "mass_flow_rate.csv"
 #   D_in            : pipe diameter, inches
 #   d_in            : throat diameter, inches
 VENTURIS = [
-    ("lox_mass_flow_rate_kg_s", "LOX_VENTURI_1_PT", "LOX_VENTURI_2_PT", 1147.0, 0.61, 0.2493),
+    ("lox_mass_flow_rate_kg_s", "LOX_VENTURI_1_PT", "LOX_VENTURI_2_PT", 1147.0, 0.61, 0.2493), #rho, D, d
     ("ipa_mass_flow_rate_kg_s", "IPA_VENTURI_1_PT", "IPA_VENTURI_2_PT",  786.0, 0.61, 0.19),
 ]
 
@@ -43,6 +43,7 @@ def venturi_mfr(p1_psi, p2_psi, rho, D_in, d_in):
     A    = math.pi / 4 * d_m ** 2
     q_m  = (A / math.sqrt(1 - beta ** 4)) * math.sqrt(2 * dp_pa * rho)
     return f"{q_m:.6f}"
+
 
 
 def main():
