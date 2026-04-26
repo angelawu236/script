@@ -6,15 +6,12 @@ CDA_CSV = "cda.csv"
 
 def load_csvs():
     delay_df = pd.read_csv(DELAY_CSV)
-    cda_df = pd.read_csv(CDA_CSV)
 
     delay_df.columns = delay_df.columns.str.strip()
-    cda_df.columns = cda_df.columns.str.strip()
 
     print("Delay columns:", delay_df.columns.tolist())
-    print("CDA columns:", cda_df.columns.tolist())
-
-    return delay_df, cda_df
+    
+    return delay_df
 
 
 def plot_interactive_pt(delay_df, pt_col, valve_cols):
@@ -79,7 +76,7 @@ def plot_interactive_pt(delay_df, pt_col, valve_cols):
 
 
 def main():
-    delay_df, cda_df = load_csvs()
+    delay_df = load_csvs()
 
     pt_col = "pt NITROGEN_TANK_PT value"
     valve_cols = ["valve_0"]
