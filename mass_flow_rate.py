@@ -10,6 +10,7 @@ Edit CONFIG below, then run: python3 mass_flow_rate.py
 
 import csv
 import math
+import matplotlib.pyplot as plt
 
 # ── CONFIGURATION ─────────────────────────────────────────────────────────────
 
@@ -53,6 +54,7 @@ def main():
         writer.writerow(["time_s"] + mfr_cols)
 
         rows = 0
+        plot_data = {label: ([], []) for label, *_ in VENTURIS}
         for row in reader:
             ts = row.get("time_s", "").strip()
             if not ts:
@@ -61,11 +63,31 @@ def main():
             for label, p1_col, p2_col, rho, D_in, d_in in VENTURIS:
                 p1 = row.get(p1_col, "").strip()
                 p2 = row.get(p2_col, "").strip()
-                out_row.append(venturi_mfr(float(p1), float(p2), rho, D_in, d_in) if p1 and p2 else "")
+                val = venturi_mfr(float(p1), float(p2), rho, D_in, d_in) if p1 and p2 else ""
+                out_row.append(val)
+                if val:
+                    plot_data[label][0].append(float(ts))
+                    plot_data[label][1].append(float(val))
             writer.writerow(out_row)
             rows += 1
+        plot_data = [(label, t, m) for label, (t, m) in plot_data.items()]
 
     print(f"Written {rows} rows to {OUTPUT_CSV}")
+
+    # ── Plot ──────────────────────────────────────────────────────────────────
+    fig, ax = plt.subplots(figsize=(11, 5))
+    for label, times, m_vals in plot_data:
+        t0 = times[0] if times else 0
+        ax.plot([t - t0 for t in times], m_vals, marker="o", markersize=3, linewidth=1.2, label=label)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Mass flow rate (kg/s)")
+    ax.set_title("Venturi mass flow rate vs time")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("mass_flow_rate_plot.png", dpi=150)
+    print("Saved mass_flow_rate_plot.png")
+    plt.show()
 
 
 if __name__ == "__main__":
