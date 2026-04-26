@@ -676,3 +676,11 @@
 {"version": 1, "ts_s": 1777067652.440622, "pt_code": 14, "value": -175.6}
 {"version": 1, "ts_s": 1777067652.441448, "pt_code": 15, "value": 175.3}
 {"version": 1, "ts_s": 1777067652.441474, "pt_code": 17, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 5, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 6, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 5, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 6, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 5, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 6, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 5, "value": 175.1}
+{"version": 1, "ts_s": 1777067652.441474, "pt_code": 6, "value": 175.1}

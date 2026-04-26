@@ -2,7 +2,7 @@
 Reads a mosquitto_sub log and writes a CSV with one row per PT reading.
 Every PT column is filled using the last known value for that PT.
 
-Edit CONFIG below, then run: python pt_timeseries.py
+Edit CONFIG below, then run: python3 pt_timeseries.py
 """
 
 import csv
@@ -53,17 +53,13 @@ def main():
                 msg = json.loads(line)
             except json.JSONDecodeError:
                 continue
-
             if "pt_code" not in msg:
                 continue
-
             ts   = msg["ts_s"]
             code = int(msg["pt_code"])
             val  = float(msg["value"])
-
             if code not in PT_NAMES:
                 continue
-
             last_known[code] = val
             row = [f"{ts:.6f}"] + [last_known.get(c, "") for c in pt_codes]
             w.writerow(row)
