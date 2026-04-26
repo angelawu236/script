@@ -1,3 +1,3 @@
-First run parse_log.py to get the csv files. Make sure the mqtt log is called "out.txt" or just change the name in parse_log.py. This will output 2 csv files, one for the valve delay and pt reading, one for just pt readings. 
+First run pt_timeseries.py to get the csv files. Make sure the mqtt log is called "out.txt" or just change the name in pt_timeseries.py. This will output a csv file, which will just be timestamp and all the PTs you specify in the dictionary "PT_NAMES". 
 
-Then to view the delay graph, run data.py
+Then to get the mass flow rates of specific PTs, specifiy the PTs in the array VENTURIS. Run mass_flow_rate.py - you will see ipa and lox mass flow rate as last 2 columns in resulting CSV. Check mass_flow_rate.csv to see the csv file which will contain the mass flow rates for each time stamp. It will also output a graph of mass flow rate over time.  
