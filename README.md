@@ -7,7 +7,7 @@ Incremental CdA analysis. All resulting csv files are in the 2 folders, test1 (I
    Script: process_raw.py\
    Output: 1_test{}_trimmed.csv\
 
-4. Processed with all mass flows - CSV 2
+4. Processed with all mass flows - CSV 2\
     -> TIME | PT1 | PT2 | Mass Flow (orifice) | Mass Flow (venturi)\
    Script: venturi_mass_flow.py\
    Output: 2_test{}_with_venturi.csv\
