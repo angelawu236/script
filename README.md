@@ -20,8 +20,8 @@ Incremental CdA analysis. All resulting csv files are in the 2 folders, test1 (I
    Script: cda_calculations.py\
    Output: 3_test{}_with_cda.csv\
    Equations:
-     - CdA equation for orifice: CdA = mass flow (orifice) /sqrt(2*999.1*(PT2-0)*6894.8)
-     - CdA equation for venturi: CdA = mass flow (venturi) /sqrt(2*999.1*(PT2-PT1)*6894.8)
+     - CdA equation for orifice: CdA = mass flow (orifice) /sqrt(2 * 999.1 * (PT2-0)*6894.8)
+     - CdA equation for venturi: CdA = mass flow (venturi) /sqrt(2 * 999.1 * (PT2-PT1)*6894.8)
   
 7. Graph CdA (y) vs mass flow(x) for both venturi and orifice\
    Script: graph_cda.py\
