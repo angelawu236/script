@@ -1,158 +1,84 @@
-"""
-Interactively pick one of two trimmed CSVs and plot:
-    x = mass flow rate (kg/s)
-    y = CdA (m^2)
-with two lines: one for the venturi, one for the orifice.
-
-Once the orifice mass flow returns to its idle value (~14.848), the rest of the
-file is treated as garbage and dropped from the plot.
-
-Run:
-    python plot_cda.py
-"""
+# Use output of delay.py and plotly to graph out TIME (x) vs PT Reading (y), in MILLISECONDS.
+# Add a vertical line from when the valve was opened (state = 1).
+# TIME from delay.py output is in seconds — convert to ms and start from 0.
+# Save interactive HTML graph to delay folder (viewable in any browser, no Python needed).
 
 import csv
-import sys
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
-# ── CONFIG ─────────────────────────────────────────────────────────────────────
-FILES = {
-    "1": "cda_test1_trimmed.csv",
-    "2": "cda_test2_trimmed.csv",
-}
+# Which test: "test1" (IPA) or "test2" (LOX)
+TEST = "test2"
 
-IDLE_VALUE = 14.848    # orifice mass flow value when the sensor is idle
-TOL = 1e-3             # tolerance for the "is at idle" check
+# Which valve (9 = IPA_ENGINE, 10 = LOX_ENGINE)
+VALVE_CODE = 9 if TEST == "test1" else 10
 
-# Outlier filtering on CdA (per series). Set to None to disable.
-# 1.5 = standard Tukey rule. Smaller = stricter (drops more), larger = looser.
-OUTLIER_IQR_K = 1.5
-# ───────────────────────────────────────────────────────────────────────────────
+valve_dct = {9: "IPA Engine", 10: "LOX Engine"}
 
+# Which PT
+PT_CODE = 17
 
-def pick_file():
-    print("Which CSV do you want to plot?")
-    for k, name in FILES.items():
-        print(f"  {k}) {name}")
-    choice = input("Enter 1 or 2: ").strip()
-    if choice not in FILES:
-        print(f"Invalid choice {choice!r}.")
-        sys.exit(1)
-    return FILES[choice]
+# Input file (output of delay.py)
+INPUT_FILE = f"delay/{TEST}_valve{VALVE_CODE}_pt{PT_CODE}.csv"
+
+# Output interactive graph
+OUTPUT_FILE = f"delay/{TEST}_valve{VALVE_CODE}_pt{PT_CODE}.html"
+
+# ================================================
 
 
-def find_col(header, needle):
-    """Return the index of the first header containing `needle` (case-sensitive)."""
-    for i, name in enumerate(header):
-        if needle in name:
-            return i
-    raise KeyError(f"No column matching {needle!r} in header: {header}")
+def load_data(input_file):
+    times = []
+    valve_states = []
+    pt_readings = []
+
+    with open(input_file, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)  # skip header
+        for row in reader:
+            times.append(float(row[0]))
+            valve_states.append(int(row[1]))
+            pt_readings.append(float(row[2]))
+
+    return times, valve_states, pt_readings
 
 
-def load(path):
-    with open(path, newline="") as f:
-        r = csv.reader(f)
-        header = next(r)
-        rows = [row for row in r if row]   # skip blank lines
-    return header, rows
+if __name__ == '__main__':
+    times, valve_states, pt_readings = load_data(INPUT_FILE)
 
+    # Convert to ms starting from 0
+    t0 = times[0]
+    times_ms = [(t - t0) * 1000 for t in times]
 
-def to_float(s):
-    """Parse a CSV cell to float, or None if blank/invalid."""
-    if s == "" or s is None:
-        return None
-    try:
-        return float(s)
-    except ValueError:
-        return None
-
-
-def filter_outliers(xs, ys, k):
-    """Drop (x, y) pairs whose x is outside Q1 - k*IQR .. Q3 + k*IQR.
-    Returns (xs_kept, ys_kept, n_dropped)."""
-    if k is None or len(xs) < 4:
-        return xs, ys, 0
-    sorted_xs = sorted(xs)
-    n = len(sorted_xs)
-    q1 = sorted_xs[n // 4]
-    q3 = sorted_xs[(3 * n) // 4]
-    iqr = q3 - q1
-    lo, hi = q1 - k * iqr, q3 + k * iqr
-    kept_x, kept_y = [], []
-    for x, y in zip(xs, ys):
-        if lo <= x <= hi:
-            kept_x.append(x)
-            kept_y.append(y)
-    return kept_x, kept_y, len(xs) - len(kept_y)
-
-
-def main():
-    path = pick_file()
-    header, rows = load(path)
-
-    # Auto-detect which propellant by scanning the header
-    propellant = "LOX" if any("LOX" in h for h in header) else "IPA"
-
-    iv = find_col(header, f"{propellant} Venturi Mass Flow")
-    io = find_col(header, f"{propellant} Orifice Mass Flow")
-    cv = find_col(header, f"{propellant} CdA venturi")
-    co = find_col(header, f"{propellant} CdA orifice")
-
-    # Build two parallel series, stopping at the first row where the orifice
-    # mass flow is back at its idle value (~14.848).
-    v_x, v_y = [], []   # venturi: mass flow vs CdA
-    o_x, o_y = [], []   # orifice: mass flow vs CdA
-
-    cutoff_idx = None
-    for i, row in enumerate(rows):
-        m_orifice = to_float(row[io])
-        if m_orifice is not None and abs(m_orifice - IDLE_VALUE) < TOL:
-            cutoff_idx = i
+    # Find when valve first opens (state = 1)
+    valve_open_ms = None
+    for i, state in enumerate(valve_states):
+        if state == 1:
+            valve_open_ms = times_ms[i]
             break
 
-        m_venturi = to_float(row[iv])
-        cda_v = to_float(row[cv])
-        cda_o = to_float(row[co])
+    fig = go.Figure()
 
-        if m_venturi is not None and cda_v is not None:
-            v_x.append(m_venturi)
-            v_y.append(cda_v)
-        if m_orifice is not None and cda_o is not None:
-            o_x.append(m_orifice)
-            o_y.append(cda_o)
+    fig.add_trace(go.Scatter(
+        x=times_ms, y=pt_readings,
+        mode='lines',
+        name='PT Reading',
+        hovertemplate='Time: %{x:.2f} ms<br>Pressure: %{y:.3f} psi<extra></extra>'
+    ))
 
-    total = len(rows)
-    used = cutoff_idx if cutoff_idx is not None else total
-    print(f"Loaded {total} rows from {path}")
-    print(f"Using {used} rows  (cutoff at row {cutoff_idx})"
-          if cutoff_idx is not None else
-          f"Using all {total} rows  (orifice never returned to idle)")
-    print(f"Venturi points: {len(v_x)}   Orifice points: {len(o_x)}")
+    if valve_open_ms is not None:
+        fig.add_vline(x=valve_open_ms, line_dash='dash', line_color='red',
+                      annotation_text=f'Valve Opened ({valve_open_ms:.2f} ms)',
+                      annotation_position='top right')
 
-    # Drop CdA outliers (per series) before plotting.
-    v_x, v_y, v_dropped = filter_outliers(v_x, v_y, OUTLIER_IQR_K)
-    o_x, o_y, o_dropped = filter_outliers(o_x, o_y, OUTLIER_IQR_K)
-    if OUTLIER_IQR_K is not None:
-        print(f"Outlier filter (k={OUTLIER_IQR_K}): "
-              f"venturi dropped {v_dropped}, orifice dropped {o_dropped}")
+    title = "IPA" if TEST == "test1" else "LOX" 
+    pt = "IPA Orifice" if TEST == "test1" else "LOX Orifice"
+    fig.update_layout(
+        title=f'Delay — {title} (Valve {valve_dct[VALVE_CODE]}, PT {pt})',
+        xaxis_title='Time (ms)',
+        yaxis_title='PT Reading (psi)',
+        hovermode='x unified'
+    )
 
-    # ---- plot ----
-    fig, ax = plt.subplots(figsize=(10, 6))
-    if v_x:
-        ax.plot(v_x, v_y, label=f"{propellant} venturi",
-                marker="o", markersize=3, linewidth=1)
-    if o_x:
-        ax.plot(o_x, o_y, label=f"{propellant} orifice",
-                marker="s", markersize=3, linewidth=1)
-
-    ax.set_xlabel("Mass flow rate (kg/s)")
-    ax.set_ylabel("CdA (m²)")
-    ax.set_title(f"{propellant}: CdA vs mass flow rate\n({path})")
-    ax.grid(True, alpha=0.3)
-    ax.legend()
-    plt.tight_layout()
-    plt.show()
-
-
-if __name__ == "__main__":
-    main()
+    fig.write_html(OUTPUT_FILE)
+    print(f"Interactive graph saved to {OUTPUT_FILE}")
+    print(f"Graph saved to {OUTPUT_FILE}")
