@@ -1,11 +1,11 @@
 Incremental CdA analysis. All resulting csv files are in the 2 folders, test1 (IPA) and test2 (LOX). Below is an outline of how the scripts were used and in what order: 
 
-TLDR:
+#TLDR:
 - To see "raw" data, go to each tests' folder and check the csv file "1_test{}_trimmed.csv" . PT1 and 2 are venturis. PT 3 is tank PT. PT 4 is orifice PT.
 - To see data with cda values and mass flow rates, go to each tests' folder and check the csv file "3_test{}_with_cda.csv"
 - To see graphs for cda values, go to each tets' folder and download the html files. Then, open it by either running "open {file name}" on Mac, or "start {file name}"
 
-=============================== More Details and Equations used ========================================\
+#More Details and Equations used:
 
 1. Raw Data - all the TXT files in the folder raw data (both tests). For each test: 
 
