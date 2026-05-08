@@ -30,10 +30,10 @@ def load_data(input_file):
         reader = csv.reader(f)
         next(reader)  # skip header
         for row in reader:
-            mf_venturi = float(row[3])
-            mf_orifice = float(row[4])
-            cda_o = float(row[5])
-            cda_v = float(row[6])
+            mf_venturi = float(row[6])
+            mf_orifice = float(row[5])
+            cda_o = float(row[7])
+            cda_v = float(row[8])
 
             mass_flow_venturi.append(mf_venturi)
             mass_flow_orifice.append(mf_orifice)
