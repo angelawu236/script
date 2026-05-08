@@ -14,14 +14,16 @@ VALVE_CODE = 9 if TEST == "test1" else 10
 
 valve_dct = {9: "IPA Engine", 10: "LOX Engine"}
 
-# Which PT
-PT_CODE = 17
+# Which PTs
+PT_CODES = [17, 9]
 
-# Input file (output of delay.py)
-INPUT_FILE = f"delay/{TEST}_valve{VALVE_CODE}_pt{PT_CODE}.csv"
+FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"
+
+# Input file (single CSV output of delay.py)
+INPUT_FILE = f"delay/{TEST}_{FLOW_TYPE}_delay.csv"
 
 # Output interactive graph
-OUTPUT_FILE = f"delay/{TEST}_valve{VALVE_CODE}_pt{PT_CODE}.html"
+OUTPUT_FILE = f"delay/{TEST}_{FLOW_TYPE}_delay.html"
 
 # ================================================
 
@@ -29,7 +31,8 @@ OUTPUT_FILE = f"delay/{TEST}_valve{VALVE_CODE}_pt{PT_CODE}.html"
 def load_data(input_file):
     times = []
     valve_states = []
-    pt_readings = []
+    pt1_readings = []
+    pt2_readings = []
 
     with open(input_file, 'r') as f:
         reader = csv.reader(f)
@@ -37,13 +40,14 @@ def load_data(input_file):
         for row in reader:
             times.append(float(row[0]))
             valve_states.append(int(row[1]))
-            pt_readings.append(float(row[2]))
+            pt1_readings.append(float(row[2]))
+            pt2_readings.append(float(row[3]))
 
-    return times, valve_states, pt_readings
+    return times, valve_states, pt1_readings, pt2_readings
 
 
 if __name__ == '__main__':
-    times, valve_states, pt_readings = load_data(INPUT_FILE)
+    times, valve_states, pt1_readings, pt2_readings = load_data(INPUT_FILE)
 
     # Convert to ms starting from 0
     t0 = times[0]
@@ -58,10 +62,20 @@ if __name__ == '__main__':
 
     fig = go.Figure()
 
+    pt_label_1 = "IPA Orifice" if TEST == "test1" else "LOX Orifice"
+    pt_label_2 = "IPA Tank" if TEST == "test1" else "LOX Tank"
+
     fig.add_trace(go.Scatter(
-        x=times_ms, y=pt_readings,
+        x=times_ms, y=pt1_readings,
         mode='lines',
-        name='PT Reading',
+        name=f'PT {PT_CODES[0]} ({pt_label_1})',
+        hovertemplate='Time: %{x:.2f} ms<br>Pressure: %{y:.3f} psi<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=times_ms, y=pt2_readings,
+        mode='lines',
+        name=f'PT {PT_CODES[1]} ({pt_label_2})',
         hovertemplate='Time: %{x:.2f} ms<br>Pressure: %{y:.3f} psi<extra></extra>'
     ))
 
@@ -71,9 +85,8 @@ if __name__ == '__main__':
                       annotation_position='top right')
 
     title = "IPA" if TEST == "test1" else "LOX" 
-    pt = "IPA Orifice" if TEST == "test1" else "LOX Orifice"
     fig.update_layout(
-        title=f'Delay — {title} (Valve {valve_dct[VALVE_CODE]}, PT {pt})',
+        title=f'Delay — {title} (Valve {valve_dct[VALVE_CODE]})',
         xaxis_title='Time (ms)',
         yaxis_title='PT Reading (psi)',
         hovermode='x unified'
@@ -81,4 +94,3 @@ if __name__ == '__main__':
 
     fig.write_html(OUTPUT_FILE)
     print(f"Interactive graph saved to {OUTPUT_FILE}")
-    print(f"Graph saved to {OUTPUT_FILE}")

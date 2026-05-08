@@ -2,10 +2,10 @@
 # and create a new CSV file with the same columns as the output of process_raw.py but with
 # an additional column of venturi mass flow. 
 
-# Format: TIME | PT1 | PT2 | Mass Flow (orifice) | Mass Flow (venturi) 
+# Format: TIME | PT1 | PT2 | PT3 | PT4 | Mass Flow (orifice) | Mass Flow (venturi) 
 
-# Mass Flow (IPA venturi) = 3.19408152e-5 * sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
-# Mass Flow (LOX venturi) = 1.83788431e-5 * sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
+# Mass Flow (IPA venturi) = 1.76310132e-5 * sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
+# Mass Flow (LOX venturi) = 2.34674906e-5* sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
 
 import csv
 import math
@@ -31,9 +31,9 @@ def calc_venturi_mass_flow(pt1, pt2):
     if delta_p <= 0:
         return 0.0
     if FLOW_TYPE == "LOX":
-        return 3.19408152e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
+        return 2.34674906e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
     else:
-        return 1.83788431e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
+        return 1.76310132e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
 
 
 def process(input_file, output_file):
@@ -45,9 +45,9 @@ def process(input_file, output_file):
         writer.writerow(header + ['Mass Flow (venturi)'])
 
         for row in reader:
-            time, pt1, pt2, orifice_flow = row[0], float(row[1]), float(row[2]), row[3]
+            time, pt1, pt2, pt3, pt4, orifice_flow = row[0], float(row[1]), float(row[2]), row[3], row[4], row[5]
             venturi_flow = calc_venturi_mass_flow(pt1, pt2)
-            writer.writerow([time, pt1, pt2, orifice_flow, venturi_flow])
+            writer.writerow([time, pt1, pt2, pt3, pt4, orifice_flow, venturi_flow])
 
 
 if __name__ == '__main__':
