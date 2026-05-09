@@ -4,14 +4,21 @@
 
 # Format: TIME | PT1 | PT2 | PT3 | PT4 | Mass Flow (orifice) | Mass Flow (venturi) 
 
-# Mass Flow (IPA venturi) = 1.76310132e-5 * sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
-# Mass Flow (LOX venturi) = 2.34674906e-5* sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
+# Venturi Mass Flow (IPA venturi) = 1.76310132e-5 * sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
+# Venturi Mass Flow (LOX venturi) = 2.31233144e-5* sqrt(2 * (PT2 - PT1) * 6894.8 * 999.1)
+
+# IPA Orifice Mass Flow (Orifice, PT 4) = 0.62 * 2.129e-5 * sqrt(2*PT4*6894.8*999.1)
+# LOX Orifice Mass Flow (Orifice, PT 4) = 0.62 * 2.425e-5 * sqrt(2*PT4*6894.8*999.1)
 
 import csv
 import math
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test2"
+TEST = "test1"
+
+# Whether to use the given orifice mass flow from process_raw.py output,
+# or calculate it from PT4. Must match the setting in process_raw.py.
+USE_GIVEN_ORIFICE = False
 
 # Flow type label (used for folder name)
 FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"
@@ -36,16 +43,36 @@ def calc_venturi_mass_flow(pt1, pt2):
         return 1.76310132e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
 
 
+def calc_orifice_mass_flow(pt4):
+    """Calculate orifice mass flow rate from PT4 reading."""
+    if pt4 <= 0:
+        return 0.0
+    if FLOW_TYPE == "LOX":
+        return 0.62 * 2.425e-5 * math.sqrt(2 * pt4 * 6894.8 * 999.1)
+    else:
+        return 0.62 * 2.129e-5 * math.sqrt(2 * pt4 * 6894.8 * 999.1)
+
+
 def process(input_file, output_file):
     with open(input_file, 'r') as fin, open(output_file, 'w', newline='') as fout:
         reader = csv.reader(fin)
         writer = csv.writer(fout)
 
-        header = next(reader)
-        writer.writerow(header + ['Mass Flow (venturi)'])
+        next(reader)  # skip header
+        writer.writerow(['TIME', 'PT1', 'PT2', 'PT3', 'PT4', 'Mass Flow (orifice)', 'Mass Flow (venturi)'])
 
         for row in reader:
-            time, pt1, pt2, pt3, pt4, orifice_flow = row[0], float(row[1]), float(row[2]), row[3], row[4], row[5]
+            time = row[0]
+            pt1 = float(row[1])
+            pt2 = float(row[2])
+            pt3 = row[3]
+            pt4 = float(row[4])
+
+            if USE_GIVEN_ORIFICE:
+                orifice_flow = float(row[5])
+            else:
+                orifice_flow = calc_orifice_mass_flow(pt4)
+
             venturi_flow = calc_venturi_mass_flow(pt1, pt2)
             writer.writerow([time, pt1, pt2, pt3, pt4, orifice_flow, venturi_flow])
 

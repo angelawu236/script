@@ -9,7 +9,11 @@ import json
 import csv
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test2"
+TEST = "test1"
+
+# Whether to include the given orifice mass flow from the raw data in the output.
+# When False, the orifice flow is still used internally for trimming but not output.
+USE_GIVEN_ORIFICE = False
 
 PT1_CODE = 7
 PT2_CODE = 8
@@ -93,8 +97,13 @@ def write_csv(rows, output_file):
     """Write rows to CSV with header."""
     with open(output_file, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['TIME', 'PT1', 'PT2', 'PT3', 'PT4', 'Mass Flow (orifice)'])
-        writer.writerows(rows)
+        if USE_GIVEN_ORIFICE:
+            writer.writerow(['TIME', 'PT1', 'PT2', 'PT3', 'PT4', 'Mass Flow (orifice)'])
+            writer.writerows(rows)
+        else:
+            writer.writerow(['TIME', 'PT1', 'PT2', 'PT3', 'PT4'])
+            for row in rows:
+                writer.writerow(row[:5])  # exclude orifice column
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ import csv
 import math
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test2"
+TEST = "test1"
 
 # Flow type label (used for folder name)
 FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"

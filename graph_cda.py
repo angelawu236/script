@@ -6,7 +6,7 @@ import csv
 import plotly.graph_objects as go
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test2"
+TEST = "test1"
 
 # Flow type label (used for folder name)
 FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"
@@ -49,18 +49,18 @@ if __name__ == '__main__':
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
-        x=mf_orifice, y=cda_orifice,
+        x=mf_orifice, y=cda_venturi,
         mode='markers',
         marker=dict(size=4, opacity=0.5),
-        name='Orifice',
+        name='Venturi',
         hovertemplate='Mass Flow: %{x:.4f} kg/s<br>CdA: %{y:.6f} m²<extra></extra>'
     ))
 
     fig.add_trace(go.Scatter(
-        x=mf_venturi, y=cda_venturi,
+        x=mf_venturi, y=cda_orifice,
         mode='markers',
         marker=dict(size=4, opacity=0.5),
-        name='Venturi',
+        name='Orifice',
         hovertemplate='Mass Flow: %{x:.4f} kg/s<br>CdA: %{y:.6f} m²<extra></extra>'
     ))
 
