@@ -31,7 +31,7 @@ def calc_venturi_mass_flow(pt1, pt2):
     if delta_p <= 0:
         return 0.0
     if FLOW_TYPE == "LOX":
-        return 2.34674906e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
+        return 2.31233144e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
     else:
         return 1.76310132e-5 * math.sqrt(2 * delta_p * 6894.8 * 999.1)
 

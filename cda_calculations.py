@@ -34,7 +34,7 @@ def calc_cda_orifice(mass_flow_venturi, pt3, pt4):
 
 
 def calc_cda_venturi(mass_flow_orifice, pt3, pt4):
-    """CdA (venturi) = mass_flow_orifice / sqrt(2 * 999.1 * (PT3 - PT4) * 6894.8)"""
+    """CdA (venturi) = mass_flow_orifice / sqrt(2 * 999.1 * (PT4 - PT3) * 6894.8)"""
     delta_p = pt3 - pt4
     if delta_p <= 0:
         return 0.0
@@ -58,8 +58,8 @@ def process(input_file, output_file):
             mass_flow_orifice = float(row[5])
             mass_flow_venturi = float(row[6])
 
-            cda_orifice = calc_cda_orifice(mass_flow_venturi, pt3, pt4)
-            cda_venturi = calc_cda_venturi(mass_flow_orifice, pt3, pt4)
+            cda_orifice = calc_cda_orifice(mass_flow_orifice, pt3, pt4)
+            cda_venturi = calc_cda_venturi(mass_flow_venturi, pt3, pt4)
 
             writer.writerow([time, pt1, pt2, pt3, pt4, mass_flow_orifice, mass_flow_venturi, cda_orifice, cda_venturi])
 
