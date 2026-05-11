@@ -12,9 +12,10 @@
 
 import csv
 import math
+import os
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test1"
+TEST = os.environ.get("TEST", "test1")
 
 # Whether to use the given orifice mass flow from process_raw.py output,
 # or calculate it from PT4. Must match the setting in process_raw.py.

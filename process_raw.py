@@ -7,9 +7,10 @@
 
 import json
 import csv
+import os
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test1"
+TEST = os.environ.get("TEST", "test1")
 
 # Whether to include the given orifice mass flow from the raw data in the output.
 # When False, the orifice flow is still used internally for trimming but not output.

@@ -4,9 +4,10 @@
 
 import csv
 import plotly.graph_objects as go
+import os
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test1"
+TEST = os.environ.get("TEST", "test1")
 
 # Flow type label (used for folder name)
 FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"

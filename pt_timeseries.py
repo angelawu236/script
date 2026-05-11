@@ -6,19 +6,22 @@ import csv
 import plotly.graph_objects as go
 
 # Which test: "test1" (IPA) or "test2" (LOX)
-TEST = "test1"
+TEST = "flowtest3"
 
 # Flow type label (used for folder name)
-FLOW_TYPE = "IPA" if TEST == "test1" else "LOX"
+FLOW_TYPE = "IPA" if TEST == "flowtest2" else "LOX"
 
 # Input and output file paths
 INPUT_FILE = f"raw data (both tests)/{TEST}.txt"
-OUTPUT_FILE = f"{TEST} ({FLOW_TYPE})/pt_timeseries_{TEST}.csv"
-GRAPH_FILE = f"{TEST} ({FLOW_TYPE})/pt_timeseries_{TEST}.html"
+OUTPUT_FILE = f"pt_timeseries_{TEST}.csv"
+GRAPH_FILE = f"pt_timeseries_{TEST}.html"
 
 # All PT codes (0–17)
 PT_CODES = list(range(18))
 VALVE_CODES = list(range(18))
+
+# Which PTs to include in the graph (subset of PT_CODES)
+PT_GRAPH = [7,8,9]
 
 # Valve name mapping
 VALVE_NAMES = {
@@ -130,16 +133,16 @@ if __name__ == '__main__':
     # Graph all PTs vs time
     times = [row[0] for row in rows]
     t0 = times[0]
-    times_s = [t - t0 for t in times]
+    times_ms = [(t - t0) * 1000 for t in times]
 
     fig = go.Figure()
-    for i, pt in enumerate(PT_CODES):
-        pt_values = [row[i + 1] for row in rows]
+    for pt in PT_GRAPH:
+        pt_values = [row[pt + 1] for row in rows]
         fig.add_trace(go.Scatter(
-            x=times_s, y=pt_values,
+            x=times_ms, y=pt_values,
             mode='lines',
             name=f'PT{pt}',
-            hovertemplate='Time: %{x:.3f} s<br>Pressure: %{y:.3f} psi<extra></extra>'
+            hovertemplate='Time: %{x:.3f} ms<br>Pressure: %{y:.3f} psi<extra></extra>'
         ))
 
     # Add valve open/close events as vertical lines
@@ -147,12 +150,12 @@ if __name__ == '__main__':
     colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink', 'gray',
               'olive', 'cyan', 'magenta', 'teal', 'navy', 'maroon', 'lime', 'coral', 'indigo', 'gold']
     for ts, valve_id, opened in events:
-        t_s = ts - t0
+        t_ms = (ts - t0) * 1000
         action = "Open" if opened else "Close"
         name = VALVE_NAMES.get(valve_id, f"Valve {valve_id}")
         color = colors[valve_id % len(colors)]
         fig.add_vline(
-            x=t_s, line_dash='dash' if opened else 'dot', line_color=color,
+            x=t_ms, line_dash='dash' if opened else 'dot', line_color=color,
             annotation_text=f'{name} {action}',
             annotation_position='top left',
             annotation_font_size=9
@@ -160,7 +163,7 @@ if __name__ == '__main__':
 
     fig.update_layout(
         title=f'PT Timeseries — {TEST} ({FLOW_TYPE})',
-        xaxis_title='Time (s)',
+        xaxis_title='Time (ms)',
         yaxis_title='PT Reading (psi)',
         hovermode='x unified'
     )

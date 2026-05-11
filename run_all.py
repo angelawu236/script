@@ -1,5 +1,11 @@
 import subprocess
 import sys
+import os
+
+# Set which test to run: "test1" (IPA) or "test2" (LOX)
+TEST = "test1"
+
+os.environ["TEST"] = TEST
 
 scripts = [
     "process_raw.py",
