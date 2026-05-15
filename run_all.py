@@ -9,7 +9,7 @@ os.environ["TEST"] = TEST
 
 scripts = [
     "process_raw.py",
-    "venturi_mass_flow.py",
+    "calc_mass_flow.py",
     "cda_calculations.py",
     "graph_cda.py",
 ]
